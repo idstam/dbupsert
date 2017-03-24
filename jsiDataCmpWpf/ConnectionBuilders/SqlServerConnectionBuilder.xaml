@@ -1,0 +1,23 @@
+﻿<Window x:Class="jsiDataCmpWpf.ConnectionBuilders.SqlServerConnectionBuilder"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:jsiDataCmpWpf.ConnectionBuilders"
+        mc:Ignorable="d"
+        Title="Connect to SQL Server" Height="360" Width="300">
+    <StackPanel >
+        <TextBlock Margin="5">Server Name</TextBlock>
+        <TextBox Margin="5" Name="ServerNameText">.</TextBox>
+        <RadioButton Margin="5" Name="SqlServerAuth" IsChecked="False">Sql Server Authentication</RadioButton>
+        <TextBlock Margin="5">User Name</TextBlock>
+        <TextBox Margin="5" Name="UserNameText">.</TextBox>
+        <TextBlock Margin="5">Password</TextBlock>
+        <PasswordBox Margin="5" Name="PasswordText"></PasswordBox>
+        <RadioButton Margin="5" Name="WindowsAuth" IsChecked="True">Windows Authentication</RadioButton>
+        <Button Margin="5" Click="Connect_Click">Connect</Button>
+        <TextBlock Margin="5">Choose Database</TextBlock>
+        <ComboBox Margin="5" Name="DatabasesComboo"></ComboBox>
+        <Button Margin="5" Click="CloseButton_Click">Close</Button>
+    </StackPanel>
+</Window>
