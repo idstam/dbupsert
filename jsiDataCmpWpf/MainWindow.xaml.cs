@@ -34,16 +34,18 @@ namespace jsiDataCmpWpf
 
         private void SourceConnection_Click(object sender, RoutedEventArgs e)
         {
-            var cn = new SqlServerConnectionBuilder();
+            var cn = new SqlServerConnectionBuilder("Source database");
             cn.ShowDialog();
             _job.SourceConnectionString = cn.ConnectionString;
+            FromLabel.Text = "From " + cn.Database + " on " + cn.Server;
         }
 
         private void DestinationConnection_Click(object sender, RoutedEventArgs e)
         {
-            var cn = new SqlServerConnectionBuilder();
+            var cn = new SqlServerConnectionBuilder("Destination database");
             cn.ShowDialog();
             _job.DestinationConnectionString = cn.ConnectionString;
+            ToLabel.Text = "To " + cn.Database + " on " + cn.Server;
         }
 
         private void FetchTables_Click(object sender, RoutedEventArgs e)
@@ -57,7 +59,14 @@ namespace jsiDataCmpWpf
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
             _job.Tables = IncludedTables.Where(t => t.Include).ToList();
-            _job.UpdateDestination();
+            var status = new SyncStatus();
+            status.Show();
+
+            Task.Factory.StartNew(() =>
+                {
+                    _job.UpdateDestination(status.UpdateStatus);
+                }
+            );
         }
     }
 }

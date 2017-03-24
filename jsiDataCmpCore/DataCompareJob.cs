@@ -64,11 +64,11 @@ namespace jsiDataCmpCore
             return new ObservableCollection<Table>(result);
         }
 
-        public void UpdateDestination()
+        public void UpdateDestination(Action<string, int, int> updateStatus)
         {
             foreach (var table in Tables)
             {
-                SourceManager.ReadSource(table, DestinationManager);
+                SourceManager.ReadSource(table, DestinationManager, updateStatus);
             }
         }
     }

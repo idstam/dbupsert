@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace jsiDataCmpCore
@@ -122,10 +123,27 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             
         }
 
+        public int GetRowCount(Table table)
+        {
+            string sql = $"select count(*) from {table.SchemaName}.{table.TableName}";
+            using (var cn = new SqlConnection(_conString))
+            {
+                using (var cmd = new SqlCommand(sql, cn))
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@table", table.TableName);
+                    cmd.Parameters.AddWithValue("@schema", table.SchemaName);
+                    var value = cmd.ExecuteScalar();
+                    return (int)value;
+                }
+            }
+        }
 
-        public void ReadSource(Table table, SqlServerManager destManager)
+        public void ReadSource(Table table, SqlServerManager destManager, Action<string, int, int> updateStatus)
         {
             var sql = $"select * from {table.SchemaName}.{table.TableName}";
+            int maxCount = GetRowCount(table);
+            int rowCount= 0;
 
             using (var cn = new SqlConnection(_conString))
             {
@@ -133,8 +151,10 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                 {
                     cn.Open();
                     var reader = cmd.ExecuteReader();
+
                     while (reader.Read())
                     {
+
                         var values = reader.GetValues();
                         var destValues = destManager.GetRow(table, values);
                         if (destValues == null)
@@ -145,10 +165,11 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                         {
                             destManager.UpdateDestination(table, values);
                         }
+                        
+                        rowCount++;
+                        updateStatus(table.FullName, maxCount, rowCount);
                     }
                 }
-                    
-
             }
         }
 

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:jsiDataCmpWpf.ConnectionBuilders"
         mc:Ignorable="d"
-        Title="Connect to SQL Server" Height="360" Width="300">
+        Title="Connect to SQL Server" Height="380" Width="300">
     <StackPanel >
         <TextBlock Margin="5">Server Name</TextBlock>
         <TextBox Margin="5" Name="ServerNameText">.</TextBox>
@@ -17,7 +17,7 @@
         <RadioButton Margin="5" Name="WindowsAuth" IsChecked="True">Windows Authentication</RadioButton>
         <Button Margin="5" Click="Connect_Click">Connect</Button>
         <TextBlock Margin="5">Choose Database</TextBlock>
-        <ComboBox Margin="5" Name="DatabasesComboo"></ComboBox>
+        <ComboBox Margin="5" Name="DatabasesCombo"></ComboBox>
         <Button Margin="5" Click="CloseButton_Click">Close</Button>
     </StackPanel>
 </Window>
