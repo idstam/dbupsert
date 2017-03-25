@@ -54,6 +54,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ConnectionBuilders\IConnectionBuilder.cs" />
     <Compile Include="SyncStatus\SyncProgressBar.xaml.cs">
       <DependentUpon>SyncProgressBar.xaml</DependentUpon>
     </Compile>

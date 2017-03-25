@@ -1,16 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using jsiDataCmpCore;
 
 namespace jsiDataCmpWpf.ConnectionBuilders
@@ -18,11 +7,14 @@ namespace jsiDataCmpWpf.ConnectionBuilders
     /// <summary>
     /// Interaction logic for SqlServerConnectionBuilder.xaml
     /// </summary>
-    public partial class SqlServerConnectionBuilder : Window
+    public partial class SqlServerConnectionBuilder : Window, IConnectionBuilder
     {
         public string ConnectionString { get; set; }
         public string Database { get; set; }
         public string Server { get; set; }
+
+        public IDatabaseManager Manager { get; set; }
+
         public SqlServerConnectionBuilder(string title)
         {
             InitializeComponent();
@@ -34,6 +26,8 @@ namespace jsiDataCmpWpf.ConnectionBuilders
             SetConnectionString();
             Database = DatabasesCombo.Text;
             Server = ServerNameText.Text;
+
+            Manager = new SqlServerManager(ConnectionString, Server, Database);
             this.Close();
         }
 
@@ -68,5 +62,7 @@ namespace jsiDataCmpWpf.ConnectionBuilders
                 throw;
             }
         }
+
+        
     }
 }

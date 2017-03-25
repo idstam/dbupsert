@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using jsiDataCmpCore;
 using jsiDataCmpWpf.ConnectionBuilders;
 using Table = jsiDataCmpCore.Table;
@@ -34,18 +23,18 @@ namespace jsiDataCmpWpf
 
         private void SourceConnection_Click(object sender, RoutedEventArgs e)
         {
-            var cn = new SqlServerConnectionBuilder("Source database");
+            IConnectionBuilder cn = new SqlServerConnectionBuilder("Source database");
             cn.ShowDialog();
-            _job.SourceConnectionString = cn.ConnectionString;
-            FromLabel.Text = "From " + cn.Database + " on " + cn.Server;
+            _job.SourceManager = cn.Manager;
+            ToLabel.Text = "To " + _job.SourceManager.Location;
         }
 
         private void DestinationConnection_Click(object sender, RoutedEventArgs e)
         {
-            var cn = new SqlServerConnectionBuilder("Destination database");
+            IConnectionBuilder cn = new SqlServerConnectionBuilder("Destination database");
             cn.ShowDialog();
-            _job.DestinationConnectionString = cn.ConnectionString;
-            ToLabel.Text = "To " + cn.Database + " on " + cn.Server;
+            _job.DestinationManager = cn.Manager;
+            ToLabel.Text = "To " + _job.DestinationManager.Location;
         }
 
         private void FetchTables_Click(object sender, RoutedEventArgs e)

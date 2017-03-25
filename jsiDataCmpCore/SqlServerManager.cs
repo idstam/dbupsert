@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace jsiDataCmpCore
 {
-    public class SqlServerManager
+    public class SqlServerManager : IDatabaseManager
     {
         private readonly string _conString;
-        public SqlServerManager(string connectionString)
+        public readonly string Server;
+        public readonly string Database;
+        public string Location { get; set; }
+
+        public SqlServerManager(string connectionString, string server = "", string database = "")
         {
             _conString = connectionString;
+            Location = database + " in " + server;
         }
         
         public List<Table> GetTables()
@@ -139,7 +141,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             }
         }
 
-        public void ReadSource(Table table, SqlServerManager destManager, Action<string, int, int> updateStatus)
+        public void ReadSource(Table table, IDatabaseManager destManager, Action<string, int, int> updateStatus)
         {
             var sql = $"select * from {table.SchemaName}.{table.TableName}";
             int maxCount = GetRowCount(table);
@@ -227,7 +229,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             return null;
         }
 
-        public string CreateWhere(Table table, Dictionary<string, object> values)
+        private string CreateWhere(Table table, Dictionary<string, object> values)
         {
             var ret = " WHERE ";
             foreach (var colName in table.PrimaryKeyColumns)
@@ -242,6 +244,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
         {
             
         }
+
     }
 
     public static class SqlServerExtensions
