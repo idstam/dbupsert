@@ -11,7 +11,7 @@ namespace jsiDataCmpCore
         public readonly string Server;
         public readonly string Database;
         public string Location { get; set; }
-
+        public bool HasSchema => true;
         public SqlServerManager(string connectionString, string server = "", string database = "")
         {
             _conString = connectionString;
@@ -167,7 +167,6 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                         {
                             destManager.UpdateDestination(table, values);
                         }
-                        Thread.Sleep(1000);
                         rowCount++;
                         updateStatus(table.FullName, maxCount, rowCount);
                     }

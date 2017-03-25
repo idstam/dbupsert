@@ -8,8 +8,16 @@
         Title="MainWindow" Height="350" Width="525">
     <DockPanel >
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <Button Margin="5" Click="SourceConnection_Click">Source Connection</Button>
-            <Button Margin="5" Click="DestinationConnection_Click">Destination Connection</Button>
+            <ComboBox Name="SourceCombo" Margin="5" IsReadOnly="True" SelectedIndex="0" DropDownClosed="SourceCombo_DropDownClosed">
+                <ComboBoxItem Content="None"/>
+                <ComboBoxItem Content="SqlServer"/>
+                <ComboBoxItem Content="Sqlite"/>
+            </ComboBox>
+            <ComboBox Name ="DestCombo" Margin="5" IsReadOnly="True" SelectedIndex="0" DropDownClosed="DestCombo_DropDownClosed">
+                <ComboBoxItem Content="None"/>
+                <ComboBoxItem Content="SqlServer"/>
+                <ComboBoxItem Content="Sqlite"/>
+            </ComboBox>
             <Button Margin="5" Click="FetchTables_Click" >Fetch Tables</Button>
         </StackPanel>
 

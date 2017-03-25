@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using jsiDataCmpCore;
 using jsiDataCmpWpf.ConnectionBuilders;
 using Table = jsiDataCmpCore.Table;
@@ -21,22 +22,6 @@ namespace jsiDataCmpWpf
             InitializeComponent();
         }
 
-        private void SourceConnection_Click(object sender, RoutedEventArgs e)
-        {
-            IConnectionBuilder cn = new SqlServerConnectionBuilder("Source database");
-            cn.ShowDialog();
-            _job.SourceManager = cn.Manager;
-            ToLabel.Text = "To " + _job.SourceManager.Location;
-        }
-
-        private void DestinationConnection_Click(object sender, RoutedEventArgs e)
-        {
-            IConnectionBuilder cn = new SqlServerConnectionBuilder("Destination database");
-            cn.ShowDialog();
-            _job.DestinationManager = cn.Manager;
-            ToLabel.Text = "To " + _job.DestinationManager.Location;
-        }
-
         private void FetchTables_Click(object sender, RoutedEventArgs e)
         {
             IncludedTables = new ObservableCollection<Table>(_job.SameTables());
@@ -47,6 +32,8 @@ namespace jsiDataCmpWpf
 
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
+            if (IncludedTables == null || IncludedTables.Count == 0) return;
+
             _job.Tables = IncludedTables.Where(t => t.Include).ToList();
             var status = new SyncStatusWindow();
             status.Show();
@@ -57,5 +44,39 @@ namespace jsiDataCmpWpf
                 }
             );
         }
+
+        private void SourceCombo_DropDownClosed(object sender, System.EventArgs e)
+        {
+            _job.SourceManager = GetDatabaseManager("Source database", SourceCombo);
+            if (_job.SourceManager == null) return;
+
+            ToLabel.Text = "From " + _job.SourceManager.Location;
+        }
+        private void DestCombo_DropDownClosed(object sender, System.EventArgs e)
+        {
+            _job.DestinationManager= GetDatabaseManager("Destination database", DestCombo);
+            if (_job.DestinationManager == null) return;
+
+            ToLabel.Text = "To " + _job.DestinationManager.Location;
+        }
+
+        private IDatabaseManager GetDatabaseManager(string databaseRole, ComboBox combo)
+        {
+            IConnectionBuilder cn;
+            switch (combo.SelectedIndex)
+            {
+                case 1:
+                    cn = new SqlServerConnectionBuilder(databaseRole);
+                    break;
+                case 2:
+                    cn = new SqliteConnectionBuilder(databaseRole);
+                    break;
+                default:
+                    return null;
+            }
+            cn.ShowDialog();
+            return cn.Manager;
+        }
+
     }
 }

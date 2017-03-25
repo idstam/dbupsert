@@ -16,8 +16,15 @@ namespace jsiDataCmpCore
         {
             var srcTables = SourceManager.GetTables();
             var destTables = DestinationManager.GetTables();
-
-            var result = srcTables.Where(source => destTables.Any(dest => dest.FullName == source.FullName)).ToList();
+            List<Table> result;
+            if (SourceManager.HasSchema && DestinationManager.HasSchema)
+            {
+                result = srcTables.Where(source => destTables.Any(dest => dest.FullName == source.FullName)).ToList();
+            }
+            else
+            {
+                result = srcTables.Where(source => destTables.Any(dest => dest.TableName == source.TableName)).ToList();
+            }
 
             return new ObservableCollection<Table>(result);
         }

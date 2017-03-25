@@ -5,6 +5,7 @@ namespace jsiDataCmpCore
 {
     public interface IDatabaseManager
     {
+        bool HasSchema { get; }
         string Location { get; set; }
         Dictionary<string, object> GetRow(Table table, Dictionary<string, object> values);
         int GetRowCount(Table table);
