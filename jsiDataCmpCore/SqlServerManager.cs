@@ -165,7 +165,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                         {
                             destManager.UpdateDestination(table, values);
                         }
-                        
+                        Thread.Sleep(1000);
                         rowCount++;
                         updateStatus(table.FullName, maxCount, rowCount);
                     }

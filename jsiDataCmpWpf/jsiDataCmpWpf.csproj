@@ -54,8 +54,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="SyncStatus.xaml.cs">
-      <DependentUpon>SyncStatus.xaml</DependentUpon>
+    <Compile Include="SyncStatus\SyncProgressBar.xaml.cs">
+      <DependentUpon>SyncProgressBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SyncStatus\SyncStatusWindow.xaml.cs">
+      <DependentUpon>SyncStatusWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="ConnectionBuilders\SqlServerConnectionBuilder.xaml">
       <SubType>Designer</SubType>
@@ -76,7 +79,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SyncStatus.xaml">
+    <Page Include="SyncStatus\SyncProgressBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SyncStatus\SyncStatusWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -12,15 +12,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using jsiDataCmpWpf.SyncStatus;
 
 namespace jsiDataCmpWpf
 {
     /// <summary>
     /// Interaction logic for SyncStatus.xaml
     /// </summary>
-    public partial class SyncStatus : Window
+    public partial class SyncStatusWindow : Window
     {
-        public SyncStatus()
+        private Dictionary<string, SyncProgressBar> _progressBars = new Dictionary<string, SyncProgressBar>();
+        public SyncStatusWindow()
         {
             InitializeComponent();
         }
@@ -29,9 +31,19 @@ namespace jsiDataCmpWpf
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
-                Title = fullTableName;
-                Progress.Maximum = (double)totalRows;
-                Progress.Value = (double)currentRow;
+                SyncProgressBar pb;
+                if (_progressBars.ContainsKey(fullTableName))
+                {
+                    pb = _progressBars[fullTableName];
+                }
+                else
+                {
+                    pb = new SyncProgressBar {Title = fullTableName};
+                    _progressBars.Add(fullTableName, pb);
+                    ProgressPanel.Children.Add(pb);
+                }
+
+                pb.UpdateProgress((double) totalRows, (double) currentRow);
             }));
 
         }

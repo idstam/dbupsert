@@ -59,7 +59,7 @@ namespace jsiDataCmpWpf
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
             _job.Tables = IncludedTables.Where(t => t.Include).ToList();
-            var status = new SyncStatus();
+            var status = new SyncStatusWindow();
             status.Show();
 
             Task.Factory.StartNew(() =>
