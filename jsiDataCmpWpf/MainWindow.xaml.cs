@@ -1,8 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using jsiDataCmpCore;
 using jsiDataCmpWpf.ConnectionBuilders;
 using Table = jsiDataCmpCore.Table;
@@ -20,6 +23,8 @@ namespace jsiDataCmpWpf
         public MainWindow()
         {
             InitializeComponent();
+            
+            
         }
 
         private void FetchTables_Click(object sender, RoutedEventArgs e)
