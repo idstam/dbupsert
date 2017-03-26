@@ -48,6 +48,8 @@ namespace jsiDataCmpCore
                             TableName = reader.GetValue<string>("name")
                             ,IdentityColumn = GetIdentityColumn(tableSql)
                             ,PrimaryKeyColumns = GetPrimaryKeys(tableSql)
+                            ,
+                            Include = true
                         });
                     }
                 }

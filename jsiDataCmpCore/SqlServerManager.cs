@@ -34,6 +34,7 @@ namespace jsiDataCmpCore
                         {
                             SchemaName = reader.GetValue<string>("TABLE_SCHEMA"),
                             TableName = reader.GetValue<string>("TABLE_NAME")
+                            ,Include = true
                         });
                     }
                 }

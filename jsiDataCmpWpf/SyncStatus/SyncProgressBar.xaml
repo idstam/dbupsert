@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="300">
     <StackPanel>
-        <TextBlock Name="CurrentTableText">the table name</TextBlock>
-        <ProgressBar Margin="0,5,0,0" Height="30" Name="Progress"></ProgressBar>
+        <TextBlock Margin="5, 10, 5, 0" Name="CurrentTableText">the table name</TextBlock>
+        <ProgressBar Margin="5" Height="30" Name="Progress"></ProgressBar>
     </StackPanel>
 </UserControl>

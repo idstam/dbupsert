@@ -54,7 +54,7 @@ namespace jsiDataCmpWpf
             _job.SourceManager = GetDatabaseManager("Source database", SourceCombo);
             if (_job.SourceManager == null) return;
 
-            ToLabel.Text = "From " + _job.SourceManager.Location;
+            FromLabel.Text = "From " + _job.SourceManager.Location;
         }
         private void DestCombo_DropDownClosed(object sender, System.EventArgs e)
         {

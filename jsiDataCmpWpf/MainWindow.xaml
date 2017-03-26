@@ -6,23 +6,34 @@
         xmlns:local="clr-namespace:jsiDataCmpWpf"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <DockPanel >
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <ComboBox Name="SourceCombo" Margin="5" IsReadOnly="True" SelectedIndex="0" DropDownClosed="SourceCombo_DropDownClosed">
-                <ComboBoxItem Content="None"/>
-                <ComboBoxItem Content="SqlServer"/>
-                <ComboBoxItem Content="Sqlite"/>
-            </ComboBox>
-            <ComboBox Name ="DestCombo" Margin="5" IsReadOnly="True" SelectedIndex="0" DropDownClosed="DestCombo_DropDownClosed">
-                <ComboBoxItem Content="None"/>
-                <ComboBoxItem Content="SqlServer"/>
-                <ComboBoxItem Content="Sqlite"/>
-            </ComboBox>
-            <Button Margin="5" Click="FetchTables_Click" >Fetch Tables</Button>
-        </StackPanel>
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" ></RowDefinition>
+            <RowDefinition Height="Auto" ></RowDefinition>
+            <RowDefinition  Height="*"></RowDefinition>
+            <RowDefinition  Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" ></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto" ></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Grid.Row="0" Margin="5, 0, 5, 0" >Source connection</TextBlock>
+        <ComboBox Grid.Column="0" Grid.Row="1" Name="SourceCombo" Margin="5" IsReadOnly="True" SelectedIndex="0" DropDownClosed="SourceCombo_DropDownClosed">
+            <ComboBoxItem Content="None"/>
+            <ComboBoxItem Content="SqlServer"/>
+            <ComboBoxItem Content="Sqlite"/>
+        </ComboBox>
+        <TextBlock Grid.Column="1" Grid.Row="0" Margin="5, 0, 5, 0">Destination connection</TextBlock>
+        <ComboBox Grid.Column="1" Grid.Row="1" Name ="DestCombo" Margin="5" IsReadOnly="True" SelectedIndex="0" DropDownClosed="DestCombo_DropDownClosed">
+            <ComboBoxItem Content="None"/>
+            <ComboBoxItem Content="SqlServer"/>
+            <ComboBoxItem Content="Sqlite"/>
+        </ComboBox>
+        <Button Grid.Column="3" Grid.Row="1" Margin="5" Click="FetchTables_Click" >Fetch similar tables</Button>
 
-            <ListBox DockPanel.Dock="Top" Margin="5" 
-                     
+        <ListBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4" DockPanel.Dock="Top" Margin="5" 
                      ItemsSource="{Binding IncludedTables}" Name="TablesList" BorderBrush="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -31,14 +42,10 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <DockPanel DockPanel.Dock="Bottom" >
-            <TextBlock DockPanel.Dock="Left" Margin="5" Name="FromLabel" ></TextBlock>
-            <TextBlock DockPanel.Dock="Left" Margin="5" Name="ToLabel"></TextBlock>
-            <Button DockPanel.Dock="Right" Margin="5" Name="UpdateButton" Click="UpdateButton_Click">Update</Button>
-            <Rectangle></Rectangle>
-        </DockPanel>    
+            <TextBlock Grid.Row="3" Grid.Column="0" Name="FromLabel" ></TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="1" Name="ToLabel"></TextBlock>
+        <Button Grid.Row="3" Grid.Column="3" Name="UpdateButton" Margin="5"  Click="UpdateButton_Click">Update</Button>
         
         
-        <Rectangle></Rectangle>
-    </DockPanel>
+    </Grid>
 </Window>
