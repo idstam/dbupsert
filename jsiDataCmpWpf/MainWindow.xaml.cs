@@ -42,11 +42,8 @@ namespace jsiDataCmpWpf
             var status = new SyncStatusWindow();
             status.Show();
 
-            Task.Factory.StartNew(() =>
-                {
-                    _job.UpdateDestination(status.UpdateStatus);
-                }
-            );
+            _job.UpdateDestination(status.UpdateStatus);
+            status.Close();
         }
 
         private void SourceCombo_DropDownClosed(object sender, System.EventArgs e)
