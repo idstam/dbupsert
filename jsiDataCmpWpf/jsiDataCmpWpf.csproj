@@ -142,12 +142,6 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="share-boxed.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="share-boxed %281%29.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="share-boxed-8x.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
