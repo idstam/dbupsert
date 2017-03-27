@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using jsiDataCmpCore;
 using jsiDataCmpWpf.ConnectionBuilders;
-using Table = jsiDataCmpCore.Table;
 
 namespace jsiDataCmpWpf
 {
@@ -17,7 +13,7 @@ namespace jsiDataCmpWpf
     public partial class MainWindow : Window
     {
         private DataCompareJob _job = new DataCompareJob();
-        public ObservableCollection<jsiDataCmpCore.Table> IncludedTables;
+        public ObservableCollection<jsiDataCmpCore.TablePair> IncludedTables;
 
         public MainWindow()
         {
@@ -28,7 +24,7 @@ namespace jsiDataCmpWpf
 
         private void FetchTables_Click(object sender, RoutedEventArgs e)
         {
-            IncludedTables = new ObservableCollection<Table>(_job.SameTables());
+            IncludedTables = new ObservableCollection<TablePair>(_job.SameTables());
             TablesList.ItemsSource = IncludedTables;
             DataContext = this;
 

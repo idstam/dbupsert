@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:jsiDataCmpWpf.ConnectionBuilders"
         mc:Ignorable="d"
-        Title="SQL Server" Height="360" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="SQL Server" Height="360" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <StackPanel >
         <TextBlock Margin="5, 5, 5, 0">Server Name</TextBlock>
         <TextBox Margin="5" Name="ServerNameText">.</TextBox>

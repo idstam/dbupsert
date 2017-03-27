@@ -37,7 +37,7 @@
                      ItemsSource="{Binding IncludedTables}" Name="TablesList" BorderBrush="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                    <CheckBox IsChecked="{Binding Include}" Content="{Binding Path=FullName}" />
+                    <CheckBox IsChecked="{Binding Include}" Content="{Binding Path=Title}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

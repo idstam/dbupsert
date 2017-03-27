@@ -16,7 +16,7 @@ namespace jsiDataCmpWpf
             InitializeComponent();
         }
 
-        public void UpdateStatus(string fullTableName, int totalRows, int currentRow)
+        public void UpdateStatus(string fullTableName, double totalRows, double currentRow)
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
@@ -32,7 +32,7 @@ namespace jsiDataCmpWpf
                     ProgressPanel.Children.Add(pb);
                 }
 
-                pb.UpdateProgress((double) totalRows, (double) currentRow);
+                pb.UpdateProgress(totalRows, currentRow);
             }));
 
         }

@@ -9,31 +9,57 @@ namespace jsiDataCmpCore
     {
         public IDatabaseManager SourceManager { get; set; }
         public IDatabaseManager DestinationManager { get; set; }
-        public List<Table>Tables { get; set; } = new List<Table>();
+        public List<TablePair>Tables { get; set; } = new List<TablePair>();
 
        
-        public ObservableCollection<Table> SameTables()
+        public ObservableCollection<TablePair> SameTables()
         {
             var srcTables = SourceManager.GetTables();
             var destTables = DestinationManager.GetTables();
-            List<Table> result;
-            if (SourceManager.HasSchema && DestinationManager.HasSchema)
+            var ret = new ObservableCollection<TablePair>();
+            foreach (var srcTable in srcTables)
             {
-                result = srcTables.Where(source => destTables.Any(dest => dest.FullName == source.FullName)).ToList();
-            }
-            else
-            {
-                result = srcTables.Where(source => destTables.Any(dest => dest.TableName == source.TableName)).ToList();
+                Table destTable;
+                if (SourceManager.HasSchema && DestinationManager.HasSchema)
+                {
+                    destTable = destTables.FirstOrDefault(t => t.SchemaName == srcTable.SchemaName && t.TableName == srcTable.TableName);
+                    if (destTable != null)
+                    {
+                        ret.Add(new TablePair
+                        {
+                            Title = srcTable.SchemaName + "." + srcTable.TableName,
+                            Source = srcTable,
+                            Destination = destTable,
+                            Include = true
+                        });
+                    }
+                }
+                else
+                {
+                    destTable = destTables.FirstOrDefault(t => t.TableName == srcTable.TableName);
+                    if (destTable != null)
+                    {
+                        ret.Add(new TablePair
+                        {
+                            Title = srcTable.TableName,
+                            Source = srcTable,
+                            Destination = destTable,
+                            Include = true
+                        });
+                    }
+                }
+
             }
 
-            return new ObservableCollection<Table>(result);
+
+            return ret;
         }
 
-        public void UpdateDestination(Action<string, int, int> updateStatus)
+        public void UpdateDestination(Action<string, double, double> updateStatus)
         {
-            foreach (var table in Tables)
+            foreach (var tablePair in Tables)
             {
-                SourceManager.ReadSource(table, DestinationManager, updateStatus);
+                SourceManager.ReadSource(tablePair, DestinationManager, updateStatus);
             }
         }
     }

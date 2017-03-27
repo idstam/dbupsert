@@ -7,11 +7,9 @@ namespace jsiDataCmpCore
     {
         bool HasSchema { get; }
         string Location { get; set; }
-        Dictionary<string, object> GetRow(Table table, Dictionary<string, object> values);
-        int GetRowCount(Table table);
+        double GetRowCount(Table table);
         List<Table> GetTables();
-        void Insert(Table table, Dictionary<string, object> values);
-        void ReadSource(Table table, IDatabaseManager destManager, Action<string, int, int> updateStatus);
-        void UpdateDestination(Table table, Dictionary<string, object> values);
+        void UpsertDestination(Table table, Dictionary<string, object> values);
+        void ReadSource(TablePair tablePair, IDatabaseManager destManager, Action<string, double, double> updateStatus);
     }
 }

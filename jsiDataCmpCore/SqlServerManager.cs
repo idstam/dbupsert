@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Threading;
 
 namespace jsiDataCmpCore
 {
@@ -34,7 +33,6 @@ namespace jsiDataCmpCore
                         {
                             SchemaName = reader.GetValue<string>("TABLE_SCHEMA"),
                             TableName = reader.GetValue<string>("TABLE_NAME")
-                            ,Include = true
                         });
                     }
                 }
@@ -126,7 +124,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             
         }
 
-        public int GetRowCount(Table table)
+        public double GetRowCount(Table table)
         {
             string sql = $"select count(*) from {table.SchemaName}.{table.TableName}";
             using (var cn = new SqlConnection(_conString))
@@ -134,18 +132,16 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                 using (var cmd = new SqlCommand(sql, cn))
                 {
                     cn.Open();
-                    cmd.Parameters.AddWithValue("@table", table.TableName);
-                    cmd.Parameters.AddWithValue("@schema", table.SchemaName);
                     var value = cmd.ExecuteScalar();
-                    return (int)value;
+                    return double.Parse(value.ToString());
                 }
             }
         }
 
-        public void ReadSource(Table table, IDatabaseManager destManager, Action<string, int, int> updateStatus)
+        public void ReadSource(TablePair tablePair, IDatabaseManager destManager, Action<string, double, double> updateStatus)
         {
-            var sql = $"select * from {table.SchemaName}.{table.TableName}";
-            int maxCount = GetRowCount(table);
+            var sql = $"select * from {tablePair.Source.SchemaName}.{tablePair.Source.TableName}";
+            double maxCount = GetRowCount(tablePair.Source);
             int rowCount= 0;
 
             using (var cn = new SqlConnection(_conString))
@@ -157,26 +153,24 @@ inner join sys.schemas s on t.schema_id = s.schema_id
 
                     while (reader.Read())
                     {
-
                         var values = reader.GetValues();
-                        var destValues = destManager.GetRow(table, values);
-                        if (destValues == null)
-                        {
-                            destManager.Insert(table, values);
-                        }
-                        else
-                        {
-                            destManager.UpdateDestination(table, values);
-                        }
+                        destManager.UpsertDestination(tablePair.Destination, values);
                         rowCount++;
-                        updateStatus(table.FullName, maxCount, rowCount);
+                        updateStatus(tablePair.Title, maxCount, rowCount);
                     }
                 }
             }
         }
 
-        public void Insert(Table table, Dictionary<string, object> values)
+        public void UpsertDestination(Table table, Dictionary<string, object> values)
         {
+            var destRow = GetRow(table, values);
+            if (destRow != null)
+            {
+                Update(table, values);
+                return;
+            }
+
             var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
             var columnNames = string.Join(",", values.Keys);
             var valueNames = "@" + columnNames.Replace(",", ",@");
@@ -200,8 +194,6 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                     cmd.ExecuteNonQuery();
                 }
             }
-
-
         }
         
         public Dictionary<string, object> GetRow(Table table, Dictionary<string, object> values)
@@ -237,12 +229,51 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                 ret += colName + "=@" + colName + " AND ";
             }
             ret = ret.Remove(ret.Length - 5);
-
+            ret += "; ";
             return ret;
         }
-        public void UpdateDestination(Table table, Dictionary<string, object> values)
+
+        private void Update(Table table, Dictionary<string, object> values)
         {
-            
+            var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
+            var columnNames = string.Join(",", values.Keys);
+            var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";
+
+            var update = $"UPDATE {table.SchemaName}.{table.TableName} " 
+                + GetUpdateColumns(table, values)
+                +CreateWhere(table, values);
+
+            using (var cn = new SqlConnection(_conString))
+            {
+                string sql = update;
+                if (!string.IsNullOrWhiteSpace(table.IdentityColumn))
+                {
+                    sql = identityInsert + "ON;" + update + identityInsert + "OFF;" + reseed;
+                }
+                cn.Open();
+                using (var cmd = new SqlCommand(sql, cn))
+                {
+                    foreach (var column in values.Keys)
+                    {
+                        cmd.Parameters.AddWithValue(column, values[column]);
+                    }
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private string GetUpdateColumns(Table table,  Dictionary<string, object> values)
+        {
+            var ret = " SET ";
+            foreach (var column in values.Keys)
+            {
+                if (!table.PrimaryKeyColumns.Contains(column))
+                {
+                    ret += column + "=@" + column + ", ";
+                }
+            }
+            ret = ret.Remove(ret.Length - 2);
+            return ret + " ";
         }
 
     }

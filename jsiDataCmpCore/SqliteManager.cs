@@ -48,10 +48,10 @@ namespace jsiDataCmpCore
                             TableName = reader.GetValue<string>("name")
                             ,IdentityColumn = GetIdentityColumn(tableSql)
                             ,PrimaryKeyColumns = GetPrimaryKeys(tableSql)
-                            ,
-                            Include = true
+
                         });
                     }
+                    cn.Close();
                 }
             }
 
@@ -118,18 +118,26 @@ namespace jsiDataCmpCore
             return null;
         }
 
-        public int GetRowCount(Table table)
+        public double GetRowCount(Table table)
         {
-            throw new NotImplementedException();
+            string sql = $"select count(*) from {table.TableName}";
+            using (var cn = new SQLiteConnection(_conString))
+            {
+                using (var cmd = new SQLiteCommand(sql, cn))
+                {
+                    cn.Open();
+                    var value = cmd.ExecuteScalar();
+                    return double.Parse(value.ToString());
+                }
+            }
         }
 
-
-        public void Insert(Table table, Dictionary<string, object> values)
+        public void UpsertDestination(Table table, Dictionary<string, object> values)
         {
             var columnNames = string.Join(",", values.Keys);
             var valueNames = "@" + columnNames.Replace(",", ",@");
 
-            var insert = $"INSERT INTO {table.TableName} ({columnNames}) VALUES ({valueNames});";
+            var insert = $"INSERT OR REPLACE INTO {table.TableName} ({columnNames}) VALUES ({valueNames});";
             using (var cn = new SQLiteConnection(_conString))
             {
                 string sql = insert;
@@ -142,20 +150,33 @@ namespace jsiDataCmpCore
                     }
                     cmd.ExecuteNonQuery();
                 }
+                cn.Close();
             }
         }
 
-        public void ReadSource(Table table, IDatabaseManager destManager, Action<string, int, int> updateStatus)
+        public void ReadSource(TablePair tablePair, IDatabaseManager destManager, Action<string, double, double> updateStatus)
         {
-            throw new NotImplementedException();
-        }
+            var sql = $"select * from {tablePair.Source.TableName}";
+            double maxCount = GetRowCount(tablePair.Source);
+            int rowCount = 0;
 
-        public void UpdateDestination(Table table, Dictionary<string, object> values)
-        {
-            throw new NotImplementedException();
-        }
+            using (var cn = new SQLiteConnection(_conString))
+            {
+                using (var cmd = new SQLiteCommand(sql, cn))
+                {
+                    cn.Open();
+                    var reader = cmd.ExecuteReader();
 
-        
+                    while (reader.Read())
+                    {
+                        var values = reader.GetValuesDictionary();
+                        destManager.UpsertDestination(tablePair.Destination, values);
+                        rowCount++;
+                        updateStatus(tablePair.Title, maxCount, rowCount);
+                    }
+                }
+            }
+        }
     }
     public static class SqliteExtensions
     {
