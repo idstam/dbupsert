@@ -5,19 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:jsiDataCmpWpf.ConnectionBuilders"
         mc:Ignorable="d"
-        Title="Connect to SQL Server" Height="380" Width="300">
+        Title="SQL Server" Height="360" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <StackPanel >
-        <TextBlock Margin="5">Server Name</TextBlock>
+        <TextBlock Margin="5, 5, 5, 0">Server Name</TextBlock>
         <TextBox Margin="5" Name="ServerNameText">.</TextBox>
-        <RadioButton Margin="5" Name="SqlServerAuth" IsChecked="False">Sql Server Authentication</RadioButton>
-        <TextBlock Margin="5">User Name</TextBlock>
-        <TextBox Margin="5" Name="UserNameText">.</TextBox>
-        <TextBlock Margin="5">Password</TextBlock>
-        <PasswordBox Margin="5" Name="PasswordText"></PasswordBox>
         <RadioButton Margin="5" Name="WindowsAuth" IsChecked="True">Windows Authentication</RadioButton>
-        <Button Margin="5" Click="Connect_Click">Connect</Button>
-        <TextBlock Margin="5">Choose Database</TextBlock>
-        <ComboBox Margin="5" Name="DatabasesCombo"></ComboBox>
-        <Button Margin="5" Click="CloseButton_Click">Close</Button>
+        <RadioButton Margin="5" Name="SqlServerAuth" IsChecked="False" Checked="SqlServerAuth_Checked">Sql Server Authentication</RadioButton>
+        <TextBlock Margin="5, 5, 5, 0">User Name</TextBlock>
+        <TextBox Margin="5" Name="UserNameText"></TextBox>
+        <TextBlock Margin="5, 5, 5, 0">Password</TextBlock>
+        <PasswordBox Margin="5" Name="PasswordText"></PasswordBox>
+        <DockPanel >
+            
+                <Path Name="ConnectCheckMark" Visibility="Collapsed" DockPanel.Dock="Right" Fill="#FF000000" Margin="5" Width="17" Height="17" Stretch="Fill">
+                    <Path.Data>
+                    <PathGeometry Figures="M6.41 0l-.69.72-2.78 2.78-.81-.78-.72-.72-1.41 1.41.72.72 1.5 1.5.69.72.72-.72 3.5-3.5.72-.72-1.44-1.41z" FillRule="nonzero"/>
+                    </Path.Data>
+                </Path>
+
+            <Button Margin="5" Click="Connect_Click">Connect</Button>
+
+        </DockPanel>
+        
+        <TextBlock Margin="5, 5, 5, 0">Choose Database</TextBlock>
+        <DockPanel >
+
+            <Path Name="DatabaseCheckMark" Visibility="Collapsed" DockPanel.Dock="Right" Fill="#FF000000" Margin="5" Width="17" Height="17" Stretch="Fill">
+                <Path.Data>
+                    <PathGeometry Figures="M6.41 0l-.69.72-2.78 2.78-.81-.78-.72-.72-1.41 1.41.72.72 1.5 1.5.69.72.72-.72 3.5-3.5.72-.72-1.44-1.41z" FillRule="nonzero"/>
+                </Path.Data>
+            </Path>
+
+            <ComboBox Margin="5" Name="DatabasesCombo" IsEnabled="False" SelectionChanged="DatabasesCombo_SelectionChanged"></ComboBox>
+
+        </DockPanel>
+        <Button Margin="5, 15, 5, 5" Click="CloseButton_Click">Close</Button>
     </StackPanel>
 </Window>

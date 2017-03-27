@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:jsiDataCmpWpf.ConnectionBuilders"
         mc:Ignorable="d"
         
-        Title="SqliteConnectionBuilder" Height="120" Width="300">
+        Title="SQLite" Height="110" Width="300" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Margin="5, 5, 5, 0">Database file</TextBlock>
         <DockPanel DockPanel.Dock="Top">
@@ -20,6 +20,5 @@
             <TextBox Margin="5, 0, 5, 5" Name="FileNameText" ></TextBox>
         </DockPanel>
         <Button DockPanel.Dock="Bottom" Margin="5" Name="CloseButton" Click="CloseButton_Click">Close</Button>
-        <Rectangle></Rectangle>
     </DockPanel>
 </Window>
