@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using jsiDataCmpCore;
 using jsiDataCmpWpf.SyncStatus;
 
@@ -23,14 +24,27 @@ namespace jsiDataCmpWpf
 
         public void UpdateStatus(string fullTableName, double totalRows, double currentRow)
         {
-            
 
-            this.Dispatcher.Invoke(new Action(() =>
-            {
-                TableProgress.Title = fullTableName;
-                TableProgress.UpdateProgress(totalRows, currentRow);
+            Application.Current.Dispatcher.BeginInvoke(
+              DispatcherPriority.Normal,
+              new Action(() => {
+                  TableProgress.Title = fullTableName;
+                  TableProgress.UpdateProgress(totalRows, currentRow);
 
-            }));
+              }));
+
+   
+        }
+        public void UpdateOverall(double totalTables, double currentTable)
+        {
+
+            Application.Current.Dispatcher.BeginInvoke(
+              DispatcherPriority.Normal,
+              new Action(() => {
+                  OverallProgress.UpdateProgress(totalTables, currentTable);
+
+              }));
+
 
         }
     }

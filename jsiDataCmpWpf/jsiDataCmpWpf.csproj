@@ -67,6 +67,7 @@
     <Compile Include="ConnectionBuilders\SqliteConnectionBuilder.xaml.cs">
       <DependentUpon>SqliteConnectionBuilder.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DatabaseManagers\FakeDatabaseManager.cs" />
     <Compile Include="DataCompareJob.cs" />
     <Compile Include="DatabaseManagers\IDatabaseManager.cs" />
     <Compile Include="DatabaseManagers\SqliteManager.cs" />

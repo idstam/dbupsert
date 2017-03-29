@@ -1,10 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using jsiDataCmpCore;
 using jsiDataCmpWpf.ConnectionBuilders;
+using jsiDataCmpWpf.DatabaseManagers;
 
 namespace jsiDataCmpWpf
 {
@@ -23,8 +26,28 @@ namespace jsiDataCmpWpf
             
         }
 
+        private IDatabaseManager CreateFakeDatabaseManager()
+        {
+            var ret = new FakeDatabaseManager();
+            ret.RowCount = 100;
+            ret.Location = "Fake";
+            ret.Tables.Add("Table_1", new Table
+            {
+                TableName = "Table_1", 
+                SchemaName = "",
+                IdentityColumn = "id"
+            });
+            for (int i = 0; i < 100; i++)
+            {
+                var row = new Dictionary<string, object> {{"id", i}};
+                ret.Values.Add(row);
+            }
+            return ret;
+        }
         private void FetchTables_Click(object sender, RoutedEventArgs e)
         {
+            _job.SourceManager = CreateFakeDatabaseManager();
+            _job.DestinationManager = CreateFakeDatabaseManager();
             var currentCursor = Cursor;
             Cursor = Cursors.Wait;
             IncludedTables = new ObservableCollection<TablePair>(_job.SameTables());
@@ -43,7 +66,7 @@ namespace jsiDataCmpWpf
 
             status.Show();
 
-            _job.UpdateDestination(status.UpdateStatus);
+            Task.Run(() =>_job.UpdateDestination(status.UpdateStatus, status.UpdateOverall));
             //status.Close();
         }
 

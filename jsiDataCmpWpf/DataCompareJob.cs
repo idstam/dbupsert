@@ -61,11 +61,13 @@ namespace jsiDataCmpCore
             return ret;
         }
 
-        public void UpdateDestination(Action<string, double, double> updateStatus)
+        public void UpdateDestination(Action<string, double, double> updateStatus, Action<double, double> overallStatus)
         {
-            foreach (var tablePair in Tables)
+            for(int i = 0; i < Tables.Count; i++)
             {
+                var tablePair = Tables[i];
                 SourceManager.ReadSource(tablePair, DestinationManager, updateStatus);
+                overallStatus(Tables.Count, i+1);
             }
 
         }
