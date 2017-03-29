@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading;
 using System.Windows;
+using jsiDataCmpCore;
 using jsiDataCmpWpf.SyncStatus;
 
 namespace jsiDataCmpWpf
@@ -11,28 +14,22 @@ namespace jsiDataCmpWpf
     public partial class SyncStatusWindow : Window
     {
         private Dictionary<string, SyncProgressBar> _progressBars = new Dictionary<string, SyncProgressBar>();
-        public SyncStatusWindow()
+        public  ObservableCollection<SyncProgressBar> ProgressBarsGui = new ObservableCollection<SyncProgressBar>();
+        public SyncStatusWindow(List<TablePair> jobTables)
         {
             InitializeComponent();
+            OverallProgress.Title = "Overall progress";
         }
 
         public void UpdateStatus(string fullTableName, double totalRows, double currentRow)
         {
+            
+
             this.Dispatcher.Invoke(new Action(() =>
             {
-                SyncProgressBar pb;
-                if (_progressBars.ContainsKey(fullTableName))
-                {
-                    pb = _progressBars[fullTableName];
-                }
-                else
-                {
-                    pb = new SyncProgressBar {Title = fullTableName};
-                    _progressBars.Add(fullTableName, pb);
-                    ProgressPanel.Children.Add(pb);
-                }
+                TableProgress.Title = fullTableName;
+                TableProgress.UpdateProgress(totalRows, currentRow);
 
-                pb.UpdateProgress(totalRows, currentRow);
             }));
 
         }

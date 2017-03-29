@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:jsiDataCmpWpf.SyncStatus"
         mc:Ignorable="d"
         Title="SyncStatus" Height="300" Width="300">
-    <StackPanel Name="ProgressPanel">
-    </StackPanel>
+        <StackPanel >
+            <local:SyncProgressBar x:Name="OverallProgress"></local:SyncProgressBar>
+            <local:SyncProgressBar x:Name="TableProgress" ></local:SyncProgressBar>
+        </StackPanel>
 </Window>

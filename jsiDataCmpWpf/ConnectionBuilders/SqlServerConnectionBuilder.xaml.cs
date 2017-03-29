@@ -93,5 +93,10 @@ namespace jsiDataCmpWpf.ConnectionBuilders
         {
             Keyboard.Focus(UserNameText);
         }
+
+        private void UserNameText_GotFocus(object sender, RoutedEventArgs e)
+        {
+            SqlServerAuth.IsChecked = true;
+        }
     }
 }

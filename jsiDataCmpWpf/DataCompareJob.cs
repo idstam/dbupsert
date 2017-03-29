@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace jsiDataCmpCore
 {
@@ -9,34 +10,39 @@ namespace jsiDataCmpCore
     {
         public IDatabaseManager SourceManager { get; set; }
         public IDatabaseManager DestinationManager { get; set; }
-        public List<TablePair>Tables { get; set; } = new List<TablePair>();
+        public List<TablePair> Tables { get; set; } = new List<TablePair>();
 
-       
+
         public ObservableCollection<TablePair> SameTables()
         {
             var srcTables = SourceManager.GetTables();
             var destTables = DestinationManager.GetTables();
+
             var ret = new ObservableCollection<TablePair>();
-            foreach (var srcTable in srcTables)
+            foreach (var srcTableName in srcTables.Keys)
             {
                 Table destTable;
                 if (SourceManager.HasSchema && DestinationManager.HasSchema)
                 {
-                    destTable = destTables.FirstOrDefault(t => t.SchemaName == srcTable.SchemaName && t.TableName == srcTable.TableName);
-                    if (destTable != null)
+                    var srcTable = srcTables[srcTableName];
+                    if (!destTables.ContainsKey(srcTableName))
                     {
-                        ret.Add(new TablePair
-                        {
-                            Title = srcTable.SchemaName + "." + srcTable.TableName,
-                            Source = srcTable,
-                            Destination = destTable,
-                            Include = true
-                        });
+                        continue;
                     }
+                    destTable = destTables[srcTableName];
+
+                    ret.Add(new TablePair
+                    {
+                        Title = srcTable.SchemaName + "." + srcTable.TableName,
+                        Source = srcTable,
+                        Destination = destTable,
+                        Include = false
+                    });
                 }
                 else
                 {
-                    destTable = destTables.FirstOrDefault(t => t.TableName == srcTable.TableName);
+                    var srcTable = srcTables[srcTableName];
+                    destTable = destTables[srcTable.TableName];
                     if (destTable != null)
                     {
                         ret.Add(new TablePair
@@ -61,6 +67,7 @@ namespace jsiDataCmpCore
             {
                 SourceManager.ReadSource(tablePair, DestinationManager, updateStatus);
             }
+
         }
     }
 }

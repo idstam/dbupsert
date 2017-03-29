@@ -28,10 +28,10 @@ namespace jsiDataCmpCore
             return ret;
         }
 
-        public List<Table> GetTables()
+        public Dictionary<string, Table> GetTables()
         {
             var sql = "select * from sqlite_master where type='table'";
-            var ret = new List<Table>();
+            var ret = new Dictionary<string, Table>();
             using (var cn = new SQLiteConnection(_conString))
             {
                 using (var cmd = new SQLiteCommand(sql, cn))
@@ -42,7 +42,8 @@ namespace jsiDataCmpCore
                     {
                         var tableSql = reader.GetValue<string>("sql");
 
-                        ret.Add(new Table
+                        ret.Add(reader.GetValue<string>("name"), 
+                            new Table
                         {
                             SchemaName = "",
                             TableName = reader.GetValue<string>("name")

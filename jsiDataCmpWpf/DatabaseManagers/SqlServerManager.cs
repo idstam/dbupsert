@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
+using System.Threading;
 
 namespace jsiDataCmpCore
 {
@@ -11,15 +13,19 @@ namespace jsiDataCmpCore
         public readonly string Database;
         public string Location { get; set; }
         public bool HasSchema => true;
+        private Dictionary<string, string> _identityColumns = null;
+        private Dictionary<string, List<string>> _primaryKeyColumns = null;
         public SqlServerManager(string connectionString, string server = "", string database = "")
         {
             _conString = connectionString;
             Location = database + " in " + server;
+            _identityColumns = null;
+            _primaryKeyColumns = null;
         }
         
-        public List<Table> GetTables()
+        public Dictionary<string, Table> GetTables()
         {
-            var ret = new List<Table>();
+            var ret = new Dictionary<string, Table>();
             var sql = "select * from INFORMATION_SCHEMA.TABLES";
             using (var cn = new SqlConnection(_conString))
             {
@@ -29,7 +35,8 @@ namespace jsiDataCmpCore
                     var reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        ret.Add(new Table
+                        ret.Add(reader.GetValue<string>("TABLE_SCHEMA") + "." + reader.GetValue<string>("TABLE_NAME")
+                            ,new Table
                         {
                             SchemaName = reader.GetValue<string>("TABLE_SCHEMA"),
                             TableName = reader.GetValue<string>("TABLE_NAME")
@@ -38,7 +45,7 @@ namespace jsiDataCmpCore
                 }
             }
 
-            foreach (var t in ret)
+            foreach (var t in ret.Values)
             {
                 t.PrimaryKeyColumns = GetPrimaryKeyColumns(t);
                 t.IdentityColumn = GetIdentityColumn(t);
@@ -71,57 +78,89 @@ namespace jsiDataCmpCore
 
         private List<string> GetPrimaryKeyColumns(Table table)
         {
-            var sql = @"
-select COLUMN_NAME 
+            if (_primaryKeyColumns == null)
+            {
+                _primaryKeyColumns = new Dictionary<string, List<string>>();
+                var sql = @"
+select u.TABLE_SCHEMA, u.TABLE_NAME, COLUMN_NAME 
 from INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE u
 inner
 join INFORMATION_SCHEMA.TABLE_CONSTRAINTS c on u.TABLE_SCHEMA = c.TABLE_SCHEMA and u.TABLE_NAME = c.TABLE_NAME and u.CONSTRAINT_NAME = c.CONSTRAINT_NAME
-where u.TABLE_SCHEMA=@schema AND u.TABLE_NAME=@name
 ";
 
-            var ret = new List<string>();
-            using (var cn = new SqlConnection(_conString))
-            {
-                using (var cmd = new SqlCommand(sql, cn))
+                
+                using (var cn = new SqlConnection(_conString))
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@schema", table.SchemaName);
-                    cmd.Parameters.AddWithValue("@name", table.TableName);
-
-                    var reader = cmd.ExecuteReader();
-                    while (reader.Read())
+                    using (var cmd = new SqlCommand(sql, cn))
                     {
-                        ret.Add(reader.GetValue<string>("COLUMN_NAME"));
+                        cn.Open();
+                        var reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            var ret = new List<string>();
+                            string fullName = reader.GetValue<string>("TABLE_SCHEMA") + "." +
+                                              reader.GetValue<string>("TABLE_NAME");
+                           
+                            if(_primaryKeyColumns.ContainsKey(fullName))
+                            {
+                                ret = _primaryKeyColumns[fullName];
+                            }
+                            else
+                            {
+                                _primaryKeyColumns[fullName] = ret;
+                            }
+
+                            ret.Add(reader.GetValue<string>("COLUMN_NAME"));
+                        }
                     }
                 }
             }
-            return ret;
-
+            if (_primaryKeyColumns.ContainsKey(table.FullName))
+            {
+                return _primaryKeyColumns[table.FullName];
+            }
+            else
+            {
+                return new List<string>();
+            }
         }
+
 
         private string GetIdentityColumn(Table table)
         {
+            if (_identityColumns == null)
+            {
+                _identityColumns = new Dictionary<string, string>();
 
-            string sql = @"
-select top 1 c.name from sys.columns c
+                string sql = @"
+select s.name schemaName, t.name tableName, c.name columnName from sys.columns c
 inner join sys.tables t on t.object_id = c.object_id
 inner join sys.schemas s on t.schema_id = s.schema_id
  where t.type = 'U'
  and c.is_identity = 1
- and t.name=@table
- and s.name=@schema";
-            using (var cn = new SqlConnection(_conString))
-            {
-                using (var cmd = new SqlCommand(sql, cn))
+ --and t.name=@table
+ --and s.name=@schema";
+                using (var cn = new SqlConnection(_conString))
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@table", table.TableName);
-                    cmd.Parameters.AddWithValue("@schema", table.SchemaName);
-                    var value = cmd.ExecuteScalar();
-                    return value?.ToString();
+                    using (var cmd = new SqlCommand(sql, cn))
+                    {
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("@table", table.TableName);
+                        cmd.Parameters.AddWithValue("@schema", table.SchemaName);
+                        var reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            _identityColumns.Add(reader.GetValue<string>("schemaName") + "." +  reader.GetValue<string>("tableName"), reader.GetValue<string>("columnName"));
+                        }
+                    }
                 }
             }
-            
+
+            if (_identityColumns.ContainsKey(table.FullName))
+            {
+                return _identityColumns[table.FullName];
+            }
+            return null;
         }
 
         public double GetRowCount(Table table)
@@ -177,6 +216,13 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";
 
             var insert = $"INSERT INTO {table.SchemaName}.{table.TableName} ({columnNames}) VALUES ({valueNames});";
+            foreach (var column in values.Keys)
+            {
+                if (values[column].GetType().Name == "DBNull")
+                {
+                    insert = insert.Replace("@" + column, "NULL");
+                }
+            }
             using (var cn = new SqlConnection(_conString))
             {
                 string sql=insert;
@@ -189,7 +235,11 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                 {
                     foreach (var column in values.Keys)
                     {
-                        cmd.Parameters.AddWithValue(column, values[column]);
+                        if (values[column].GetType().Name != "DBNull")
+                        {
+                            cmd.Parameters.AddWithValue(column, values[column]);
+                        }
+
                     }
                     cmd.ExecuteNonQuery();
                 }
@@ -235,6 +285,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
 
         private void Update(Table table, Dictionary<string, object> values)
         {
+            return;
             var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
             var columnNames = string.Join(",", values.Keys);
             var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";

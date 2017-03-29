@@ -22,6 +22,7 @@ namespace jsiDataCmpWpf.SyncStatus
         {
             Progress.Maximum = max;
             Progress.Value = value;
+            
         }
 
     }

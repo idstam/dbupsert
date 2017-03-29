@@ -6,10 +6,11 @@ Using icons from: [Open Iconic v1.1.1](http://useiconic.com/open)
 
 
 # Todo:
-Empty tables list when changing connection settings.
 Validate that the selected file is indeed a SQLite database in the SQLite builder.
 Set connection to 'none' if a connection builder was closed before having a valid connection.
 Count inserts and updates.
+Show overall progress
+Make sure source and destination are not the same (tables? or database?)
 Visualize table definitions.
 Map tables with unmatching names
 Manually map fields

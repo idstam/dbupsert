@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jsiDataCmpCore", "jsiDataCmpCore\jsiDataCmpCore.csproj", "{F00A53B5-1B41-477F-B1DC-6220C1B596A8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jsiDataCmpWpf", "jsiDataCmpWpf\jsiDataCmpWpf.csproj", "{555BC346-2A66-4354-ABB0-F496E44BDC63}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7022F853-5096-445B-AD57-E388C5E1E793}"
@@ -18,10 +16,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F00A53B5-1B41-477F-B1DC-6220C1B596A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F00A53B5-1B41-477F-B1DC-6220C1B596A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F00A53B5-1B41-477F-B1DC-6220C1B596A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F00A53B5-1B41-477F-B1DC-6220C1B596A8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{555BC346-2A66-4354-ABB0-F496E44BDC63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{555BC346-2A66-4354-ABB0-F496E44BDC63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{555BC346-2A66-4354-ABB0-F496E44BDC63}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -31,6 +31,7 @@
             <ComboBoxItem Content="SqlServer"/>
             <ComboBoxItem Content="Sqlite"/>
         </ComboBox>
+        <Button Grid.Column="2" Grid.Row="1" Margin="5" Click="ToggleAll_Click" >(Un-)select all</Button>
         <Button Grid.Column="3" Grid.Row="1" Margin="5" Click="FetchTables_Click" >Fetch similar tables</Button>
 
         <ListBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4" DockPanel.Dock="Top" Margin="5" 
@@ -42,8 +43,10 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Name="FromLabel" ></TextBlock>
-        <TextBlock Grid.Row="3" Grid.Column="1" Name="ToLabel"></TextBlock>
+         <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal">
+             <TextBlock Grid.Row="3" Grid.Column="0" Name="FromLabel" Margin="-1,0,1,0" ></TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="1" Name="ToLabel"></TextBlock>
+        </StackPanel>
         <Button Grid.Row="3" Grid.Column="3" Name="UpdateButton" Margin="5"  Click="UpdateButton_Click">Update</Button>
         
         
