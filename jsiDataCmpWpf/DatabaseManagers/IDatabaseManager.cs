@@ -11,5 +11,8 @@ namespace jsiDataCmpCore
         Dictionary<string, Table> GetTables();
         void UpsertDestination(Table table, Dictionary<string, object> values);
         void ReadSource(TablePair tablePair, IDatabaseManager destManager, Action<string, double, double> updateStatus);
+
+        void PrepareDestination(TablePair tablePair);
+        void FinalizeDestination();
     }
 }

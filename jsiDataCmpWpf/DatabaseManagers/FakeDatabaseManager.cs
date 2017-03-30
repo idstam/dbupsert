@@ -45,5 +45,15 @@ namespace jsiDataCmpWpf.DatabaseManagers
                 updateStatus(tablePair.Title, Values.Count, row+1);
             }
         }
+
+        public void PrepareDestination(TablePair tablePair)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FinalizeDestination()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

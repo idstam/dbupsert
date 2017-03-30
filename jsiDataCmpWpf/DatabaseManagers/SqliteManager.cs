@@ -178,6 +178,16 @@ namespace jsiDataCmpCore
                 }
             }
         }
+
+        public void PrepareDestination(TablePair tablePair)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FinalizeDestination()
+        {
+            throw new NotImplementedException();
+        }
     }
     public static class SqliteExtensions
     {

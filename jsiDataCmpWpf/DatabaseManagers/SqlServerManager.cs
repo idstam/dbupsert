@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading;
 
 namespace jsiDataCmpCore
@@ -179,9 +180,10 @@ inner join sys.schemas s on t.schema_id = s.schema_id
 
         public void ReadSource(TablePair tablePair, IDatabaseManager destManager, Action<string, double, double> updateStatus)
         {
-            var sql = $"select * from {tablePair.Source.SchemaName}.{tablePair.Source.TableName}";
+            destManager.PrepareDestination(tablePair);
             double maxCount = GetRowCount(tablePair.Source);
-            int rowCount= 0;
+            int rowCount = 0;
+            var sql = $"select * from {tablePair.Source.SchemaName}.{tablePair.Source.TableName}";
 
             using (var cn = new SqlConnection(_conString))
             {
@@ -198,38 +200,55 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                         updateStatus(tablePair.Title, maxCount, rowCount);
                     }
                 }
+                
             }
+            destManager.FinalizeDestination();
+
+        }
+
+        public void FinalizeDestination()
+        {
         }
 
         public void UpsertDestination(Table table, Dictionary<string, object> values)
         {
-            var destRow = GetRow(table, values);
-            if (destRow != null)
-            {
-                Update(table, values);
-                return;
-            }
-
             var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
             var columnNames = string.Join(",", values.Keys);
             var valueNames = "@" + columnNames.Replace(",", ",@");
             var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";
 
             var insert = $"INSERT INTO {table.SchemaName}.{table.TableName} ({columnNames}) VALUES ({valueNames});";
+
+            var checkIfUpdate = "";
+            var update = "";
+            if (table.PrimaryKeyColumns != null && table.PrimaryKeyColumns.Count != 0)
+            {
+                checkIfUpdate = $"IF NOT EXISTS(SELECT * FROM {table.SchemaName}.{table.TableName} " + CreateWhere(table) + ") BEGIN ";
+
+                update =  $" END ELSE BEGIN UPDATE {table.SchemaName}.{table.TableName} " + GetUpdateColumns(table, values) +
+                         CreateWhere(table) + "; END ";
+            }
+
             foreach (var column in values.Keys)
             {
                 if (values[column].GetType().Name == "DBNull")
                 {
                     insert = insert.Replace("@" + column, "NULL");
+                    update = update.Replace("@" + column, "NULL");
                 }
             }
             using (var cn = new SqlConnection(_conString))
             {
                 string sql=insert;
+                if (checkIfUpdate != "")
+                {
+                    sql = checkIfUpdate + insert + update;
+                }
                 if (!string.IsNullOrWhiteSpace(table.IdentityColumn))
                 {
-                    sql = identityInsert + "ON;" + insert + identityInsert + "OFF;" + reseed;
+                    sql = identityInsert + "ON;" + sql + identityInsert + "OFF;" + reseed;
                 }
+
                 cn.Open();
                 using (var cmd = new SqlCommand(sql, cn))
                 {
@@ -251,7 +270,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             //If there is no way of finding a unique row don't even try.
             if (table.PrimaryKeyColumns == null || table.PrimaryKeyColumns.Count == 0) return null;
 
-            var sql = $"select * from {table.SchemaName}.{table.TableName}" + CreateWhere(table, values);
+            var sql = $"select * from {table.SchemaName}.{table.TableName}" + CreateWhere(table);
             using (var cn = new SqlConnection(_conString))
             {
                 using (var cmd = new SqlCommand(sql, cn))
@@ -271,7 +290,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             return null;
         }
 
-        private string CreateWhere(Table table, Dictionary<string, object> values)
+        private string CreateWhere(Table table)
         {
             var ret = " WHERE ";
             foreach (var colName in table.PrimaryKeyColumns)
@@ -279,20 +298,19 @@ inner join sys.schemas s on t.schema_id = s.schema_id
                 ret += colName + "=@" + colName + " AND ";
             }
             ret = ret.Remove(ret.Length - 5);
-            ret += "; ";
+            ret += " ";
             return ret;
         }
 
         private void Update(Table table, Dictionary<string, object> values)
         {
-            return;
             var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
             var columnNames = string.Join(",", values.Keys);
             var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";
 
             var update = $"UPDATE {table.SchemaName}.{table.TableName} " 
                 + GetUpdateColumns(table, values)
-                +CreateWhere(table, values);
+                +CreateWhere(table);
 
             using (var cn = new SqlConnection(_conString))
             {
@@ -327,6 +345,9 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             return ret + " ";
         }
 
+        public void PrepareDestination(TablePair tablePair)
+        {
+        }
     }
 
     public static class SqlServerExtensions

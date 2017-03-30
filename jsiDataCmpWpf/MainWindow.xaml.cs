@@ -46,8 +46,8 @@ namespace jsiDataCmpWpf
         }
         private void FetchTables_Click(object sender, RoutedEventArgs e)
         {
-            _job.SourceManager = CreateFakeDatabaseManager();
-            _job.DestinationManager = CreateFakeDatabaseManager();
+            //_job.SourceManager = CreateFakeDatabaseManager();
+            //_job.DestinationManager = CreateFakeDatabaseManager();
             var currentCursor = Cursor;
             Cursor = Cursors.Wait;
             IncludedTables = new ObservableCollection<TablePair>(_job.SameTables());
