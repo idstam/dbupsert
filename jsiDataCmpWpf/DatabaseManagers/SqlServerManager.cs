@@ -50,7 +50,7 @@ namespace jsiDataCmpCore
             {
                 t.PrimaryKeyColumns = GetPrimaryKeyColumns(t);
                 t.IdentityColumn = GetIdentityColumn(t);
-                if (t.PrimaryKeyColumns == null && !string.IsNullOrEmpty(t.IdentityColumn))
+                if (t.PrimaryKeyColumns == null)
                 {
                     t.PrimaryKeyColumns = new List<string> {t.IdentityColumn};
                 }
@@ -213,20 +213,28 @@ inner join sys.schemas s on t.schema_id = s.schema_id
         public void UpsertDestination(Table table, Dictionary<string, object> values)
         {
             var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
-            var columnNames = string.Join(",", values.Keys);
-            var valueNames = "@" + columnNames.Replace(",", ",@");
+            var columnNames = string.Join(",", values.Keys.Select(k => "[" + k + "]"));
+
+            var valueNames = "@" + string.Join(",", values.Keys).Replace(",", ",@");
+
             var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";
 
             var insert = $"INSERT INTO {table.SchemaName}.{table.TableName} ({columnNames}) VALUES ({valueNames});";
 
-            var checkIfUpdate = "";
-            var update = "";
-            if (table.PrimaryKeyColumns != null && table.PrimaryKeyColumns.Count != 0)
+            if (table.PrimaryKeyColumns == null || table.PrimaryKeyColumns.Count == 0)
             {
-                checkIfUpdate = $"IF NOT EXISTS(SELECT * FROM {table.SchemaName}.{table.TableName} " + CreateWhere(table) + ") BEGIN ";
+                table.PrimaryKeyColumns = values.Keys.ToList();
+            }
+            
 
-                update =  $" END ELSE BEGIN UPDATE {table.SchemaName}.{table.TableName} " + GetUpdateColumns(table, values) +
-                         CreateWhere(table) + "; END ";
+            var checkIfUpdate = $"IF NOT EXISTS(SELECT * FROM {table.SchemaName}.{table.TableName} " + CreateWhere(table) + ") BEGIN ";
+            var update = $" END ELSE BEGIN UPDATE {table.SchemaName}.{table.TableName} " +
+                     GetUpdateColumns(table, values) +
+                     CreateWhere(table) + "; END ";
+
+            if (table.PrimaryKeyColumns.Count == values.Keys.Count)
+            {
+                update = " END ";
             }
 
             foreach (var column in values.Keys)
@@ -239,11 +247,7 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             }
             using (var cn = new SqlConnection(_conString))
             {
-                string sql=insert;
-                if (checkIfUpdate != "")
-                {
-                    sql = checkIfUpdate + insert + update;
-                }
+                string sql = checkIfUpdate + insert + update;
                 if (!string.IsNullOrWhiteSpace(table.IdentityColumn))
                 {
                     sql = identityInsert + "ON;" + sql + identityInsert + "OFF;" + reseed;
@@ -295,40 +299,11 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             var ret = " WHERE ";
             foreach (var colName in table.PrimaryKeyColumns)
             {
-                ret += colName + "=@" + colName + " AND ";
+                ret += "[" + colName + "]=@" + colName + " AND ";
             }
             ret = ret.Remove(ret.Length - 5);
             ret += " ";
             return ret;
-        }
-
-        private void Update(Table table, Dictionary<string, object> values)
-        {
-            var identityInsert = $"set identity_insert {table.SchemaName}.{table.TableName} ";
-            var columnNames = string.Join(",", values.Keys);
-            var reseed = $"declare @seed bigint = (select max(id) from {table.SchemaName}.{table.TableName}); DBCC CHECKIDENT ('{table.SchemaName}.{table.TableName}', RESEED, @seed); ";
-
-            var update = $"UPDATE {table.SchemaName}.{table.TableName} " 
-                + GetUpdateColumns(table, values)
-                +CreateWhere(table);
-
-            using (var cn = new SqlConnection(_conString))
-            {
-                string sql = update;
-                if (!string.IsNullOrWhiteSpace(table.IdentityColumn))
-                {
-                    sql = identityInsert + "ON;" + update + identityInsert + "OFF;" + reseed;
-                }
-                cn.Open();
-                using (var cmd = new SqlCommand(sql, cn))
-                {
-                    foreach (var column in values.Keys)
-                    {
-                        cmd.Parameters.AddWithValue(column, values[column]);
-                    }
-                    cmd.ExecuteNonQuery();
-                }
-            }
         }
 
         private string GetUpdateColumns(Table table,  Dictionary<string, object> values)
