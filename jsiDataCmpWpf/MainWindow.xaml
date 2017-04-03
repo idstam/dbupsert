@@ -12,6 +12,7 @@
             <RowDefinition Height="Auto" ></RowDefinition>
             <RowDefinition  Height="*"></RowDefinition>
             <RowDefinition  Height="Auto"></RowDefinition>
+            <RowDefinition  Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" ></ColumnDefinition>
@@ -43,11 +44,11 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-         <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal">
+        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="4" Orientation="Horizontal">
              <TextBlock Grid.Row="3" Grid.Column="0" Name="FromLabel" Margin="-1,0,1,0" ></TextBlock>
             <TextBlock Grid.Row="3" Grid.Column="1" Name="ToLabel"></TextBlock>
         </StackPanel>
-        <Button Grid.Row="3" Grid.Column="3" Name="UpdateButton" Margin="5"  Click="UpdateButton_Click">Update</Button>
+        <Button Grid.Row="4" Grid.Column="3" Name="UpdateButton" Margin="5"  Click="UpdateButton_Click">Update</Button>
         
         
     </Grid>
