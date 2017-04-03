@@ -18,7 +18,7 @@ namespace jsiDataCmpCore
             var srcTables = SourceManager.GetTables();
             var destTables = DestinationManager.GetTables();
 
-            var ret = new ObservableCollection<TablePair>();
+            var ret = new List<TablePair>();
             foreach (var srcTableName in srcTables.Keys)
             {
                 Table destTable;
@@ -58,7 +58,7 @@ namespace jsiDataCmpCore
             }
 
 
-            return ret;
+            return new ObservableCollection<TablePair>(ret.OrderBy(t => t.Title).ToList());
         }
 
         public void UpdateDestination(Action<string, double, double> updateStatus, Action<double, double> overallStatus)

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace jsiDataCmpCore
 {
@@ -180,8 +182,13 @@ inner join sys.schemas s on t.schema_id = s.schema_id
 
         public void ReadSource(TablePair tablePair, IDatabaseManager destManager, Action<string, double, double> updateStatus)
         {
+            File.AppendAllText(@"c:\temp\datacopy.log", tablePair.Title + " " + DateTime.Now.ToLongTimeString() + " ");
+
             destManager.PrepareDestination(tablePair);
             double maxCount = GetRowCount(tablePair.Source);
+            File.AppendAllText(@"c:\temp\datacopy.log", Environment.NewLine + maxCount.ToString() + Environment.NewLine);
+
+
             int rowCount = 0;
             var sql = $"select * from {tablePair.Source.SchemaName}.{tablePair.Source.TableName}";
 
@@ -225,7 +232,6 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             {
                 table.PrimaryKeyColumns = values.Keys.ToList();
             }
-            
 
             var checkIfUpdate = $"IF NOT EXISTS(SELECT * FROM {table.SchemaName}.{table.TableName} " + CreateWhere(table) + ") BEGIN ";
             var update = $" END ELSE BEGIN UPDATE {table.SchemaName}.{table.TableName} " +
@@ -241,8 +247,12 @@ inner join sys.schemas s on t.schema_id = s.schema_id
             {
                 if (values[column].GetType().Name == "DBNull")
                 {
-                    insert = insert.Replace("@" + column, "NULL");
-                    update = update.Replace("@" + column, "NULL");
+                    insert = insert.Replace("@" + column + ",", "NULL,");
+                    insert = insert.Replace("@" + column + " ", "NULL ");
+                    insert = insert.Replace("@" + column + ")", "NULL)");
+                    update = update.Replace("@" + column + ",", "NULL,");
+                    update = update.Replace("@" + column + " ", "NULL ");
+                    update = update.Replace("@" + column + ")", "NULL)");
                 }
             }
             using (var cn = new SqlConnection(_conString))
@@ -308,16 +318,17 @@ inner join sys.schemas s on t.schema_id = s.schema_id
 
         private string GetUpdateColumns(Table table,  Dictionary<string, object> values)
         {
-            var ret = " SET ";
+            var ret = "";
             foreach (var column in values.Keys)
             {
-                if (!table.PrimaryKeyColumns.Contains(column))
+                //if (!table.PrimaryKeyColumns.Contains(column) && table.IdentityColumn != column)
+                if (table.IdentityColumn != column)
                 {
-                    ret += column + "=@" + column + ", ";
+                    ret += "[" + column + "]" + "=@" + column + ", ";
                 }
             }
             ret = ret.Remove(ret.Length - 2);
-            return ret + " ";
+            return " SET " + ret + " ";
         }
 
         public void PrepareDestination(TablePair tablePair)
